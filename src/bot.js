@@ -1,12 +1,4 @@
-import {
-	Client,
-	Events,
-	GatewayIntentBits,
-	MessageType,
-	Partials,
-	REST,
-	Routes
-} from "discord.js";
+import { Client, Events, GatewayIntentBits, MessageType, Partials, REST, Routes, ActivityType } from "discord.js";
 import { Logger, LogLevel } from "meklog";
 import dotenv from "dotenv";
 import axios from "axios";
@@ -153,11 +145,18 @@ const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 client.once(Events.ClientReady, async () => {
 	await client.guilds.fetch();
 	client.user.setPresence({ activities: [], status: "online" });
+
+	client.user.setActivity({
+    name: process.env.ACTIVITY_MESSAGE,
+    type: ActivityType.Custom,
+  });
+
 	await rest.put(Routes.applicationCommands(client.user.id), {
 		body: commands
 	});
 
 	log(LogLevel.Info, "Successfully reloaded application slash (/) commands.");
+	log(LogLevel.Info, `Bot is now active with status: ${process.env.ACTIVITY_MESSAGE}`);
 });
 
 const messages = {};
