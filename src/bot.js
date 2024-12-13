@@ -151,6 +151,18 @@ client.once(Events.ClientReady, async () => {
     type: ActivityType.Custom,
   });
 
+	// Greetings message
+	const channelID = process.env.CHANNELS;
+	const channel = client.channels.cache.get(channelID);
+	const commanderRole = process.env.COMMANDER_ROLE_ID;
+	if (channel) {
+		await channel.send(`Lilith: LOGIN! A disposizione <@&${commanderRole}>`)
+			.then(message => console.log(`Sent message: ${message.content}`))
+			.catch(err => console.error(`Error sending message: ${err.message}`));
+	} else {
+		console.error("Channel not found. Check the CHANNEL_ID environment variable.");
+	}
+
 	await rest.put(Routes.applicationCommands(client.user.id), {
 		body: commands
 	});
@@ -559,7 +571,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
 				});
 			}
 			break;
-	}
-});
+			
+			// Shutdown Command
+			case "shutdown":
+				if (interaction.user.id !== process.env.ADMIN_ID) {
+					return interaction.reply("You do not have permission to shut down the bot.");
+				}
+
+				await interaction.reply("Lilith: SHUTDOWN initiated. Goodbye!");
+
+				setTimeout(() => {
+					client.destroy(); // Disconnect
+					process.exit(0);  // Exit
+				}, 3000);
+				break;
+		}
+	});
 
 client.login(process.env.TOKEN);
